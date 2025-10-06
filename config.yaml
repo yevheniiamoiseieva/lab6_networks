@@ -1,0 +1,12 @@
+application:
+  port: "8080"
+  request_timeout: 30
+  response_timeout: 30
+
+database:
+  host: "postgres"  
+  port: "5432"
+  username: "postgres"
+  password: "postgres"
+  dbname: "laba6"
+  sslmode: "disable"
