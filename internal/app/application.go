@@ -3,20 +3,25 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
-	"laba6/docs"
-	"laba6/internal/handlers"
-	"laba6/internal/routes"
 	"net/http"
 	"time"
 
-	"laba6/internal/processors"
-	"laba6/internal/repositories"
-	"laba6/pkg/config"
-
+	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"laba6/docs"
+	"laba6/internal/handlers"
+	"laba6/internal/processors"
+	"laba6/internal/repositories"
+	"laba6/internal/routes"
+	"laba6/pkg/config"
+)
+
+const (
+	RsaKeySize = 2048
+	AesKeySize = 32
 )
 
 type Application struct {
@@ -34,8 +39,11 @@ func NewApplication(ctx context.Context, cnfg *config.Configuration) (*Applicati
 	engine := gin.Default()
 
 	repos := repositories.NewRepositories(db)
-	procs := processors.NewProcessors(repos)
-	handler := handlers.NewHandler(procs)
+	keyStorage := repositories.NewPostgresKeyStorage(db.DB)
+
+	procs := processors.NewProcessors(repos, RsaKeySize, AesKeySize)
+
+	handler := handlers.NewHandler(procs, keyStorage)
 
 	router := routes.NewRouter(engine)
 	router.SetupRoutes(handler)
